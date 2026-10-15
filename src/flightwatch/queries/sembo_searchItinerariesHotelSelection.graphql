@@ -1,0 +1,399 @@
+subscription searchItinerariesHotelSelection($recipe: RecipeQL!) {
+  searchRecipeByItinerary(recipe: $recipe) {
+    ...Itinerary
+    __typename
+  }
+}
+
+fragment Money on MoneyQL {
+  amount
+  currency
+  currencySymbol
+  __typename
+}
+
+fragment ActivitySubIngredient on TicketIngredientResponseQL {
+  date
+  suggested {
+    code
+    prices {
+      totalPrice {
+        ...Money
+        __typename
+      }
+      __typename
+    }
+    activityTicketResults {
+      quantity: quantityOfTickets
+      rateId
+      title
+      ageRangeId
+      description
+      timeSlotId
+      timeSlotStartTime
+      supplierToken
+      dateMainEvent
+      ticketStartDate
+      ticketEndDate
+      isConfirmed
+      __typename
+    }
+    __typename
+  }
+  alternativeSuggestion {
+    code
+    prices {
+      totalPriceWithAlternative {
+        ...Money
+        __typename
+      }
+      __typename
+    }
+    activityTicketResults {
+      quantity: quantityOfTickets
+      rateId
+      title
+      ageRangeId
+      description
+      timeSlotId
+      timeSlotStartTime
+      supplierToken
+      dateMainEvent
+      ticketStartDate
+      ticketEndDate
+      isConfirmed
+      __typename
+    }
+    __typename
+  }
+  type: __typename
+}
+
+fragment Leg on LegQL {
+  durationInMinutes
+  luggageInformation {
+    included
+    pieces
+    type
+    unit
+    weight
+    __typename
+  }
+  platingCarrier
+  segments {
+    carrier
+    operatingCarrier
+    transportId: flightNumber
+    departureIata
+    departureDateTime
+    arrivalIata
+    arrivalDateTime
+    layoverTimeUntilNextSegmentInMinutes
+    transportType
+    vehicles
+    transportationName
+    isCabinMandatory
+    durationInMinutes
+    __typename
+  }
+  __typename
+}
+
+fragment Itinerary on ItineraryResponseQL {
+  itineraryKey
+  isSuggested
+  totalPrice {
+    ...Money
+    __typename
+  }
+  prices {
+    totalPrice {
+      ...Money
+      __typename
+    }
+    totalPriceWithAlternative {
+      ...Money
+      __typename
+    }
+    grossPrice {
+      ...Money
+      __typename
+    }
+    grossPriceWithAlternative {
+      ...Money
+      __typename
+    }
+    pricePerPerson {
+      ...Money
+      __typename
+    }
+    grossPricePerPerson {
+      ...Money
+      __typename
+    }
+    pricePerPersonWithAlternative {
+      ...Money
+      __typename
+    }
+    grossPriceWithAlternativePerPerson {
+      ...Money
+      __typename
+    }
+    priceIsWithTaxesIncluded
+    __typename
+  }
+  result {
+    ... on OwnStayResultQL {
+      date
+      numberOfNights
+      subIngredientResults {
+        ... on TicketIngredientResponseQL {
+          ...ActivitySubIngredient
+          __typename
+        }
+        type: __typename
+      }
+      __typename
+    }
+    ... on OwnTransportQL {
+      date
+      ownTransportType
+      __typename
+    }
+    ... on HotelIngredientResponseQL {
+      lengthOfStay {
+        numberOfNights
+        nightsHaveBeenSuggested
+        __typename
+      }
+      date
+      priceRange {
+        from {
+          ...Money
+          __typename
+        }
+        to {
+          ...Money
+          __typename
+        }
+        __typename
+      }
+      suggested {
+        prices {
+          grossPrice {
+            ...Money
+            __typename
+          }
+          priceIsWithTaxesIncluded
+          __typename
+        }
+        addToBasketToken
+        code: hotelCode
+        totalPrice {
+          ...Money
+          __typename
+        }
+        isRefundable
+        rooms: roomStays {
+          description
+          basicDescription
+          boardBasis
+          pax {
+            age
+            __typename
+          }
+          price {
+            ...Money
+            __typename
+          }
+          cancellationPolicies {
+            amount {
+              ...Money
+              __typename
+            }
+            fromDate
+            fromDateIso
+            __typename
+          }
+          taxesAndFees {
+            amount {
+              ...Money
+              __typename
+            }
+            type
+            isIncludedInPrice
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      suggestions {
+        addToBasketToken
+        code: hotelCode
+        prices {
+          totalPrice {
+            ...Money
+            __typename
+          }
+          deltaPrice {
+            ...Money
+            __typename
+          }
+          grossPrice {
+            ...Money
+            __typename
+          }
+          priceIsWithTaxesIncluded
+          __typename
+        }
+        isRefundable
+        rooms: roomStays {
+          description
+          basicDescription
+          boardBasis
+          pax {
+            age
+            __typename
+          }
+          price {
+            ...Money
+            __typename
+          }
+          cancellationPolicies {
+            amount {
+              ...Money
+              __typename
+            }
+            fromDate
+            fromDateIso
+            __typename
+          }
+          taxesAndFees {
+            amount {
+              ...Money
+              __typename
+            }
+            type
+            isIncludedInPrice
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      alternativeSuggestion {
+        addToBasketToken
+        code: hotelCode
+        totalPrice {
+          ...Money
+          __typename
+        }
+        isRefundable
+        rooms: roomStays {
+          description
+          basicDescription
+          boardBasis
+          roomCode
+          pax {
+            age
+            __typename
+          }
+          price {
+            ...Money
+            __typename
+          }
+          cancellationPolicies {
+            amount {
+              ...Money
+              __typename
+            }
+            fromDate
+            fromDateIso
+            __typename
+          }
+          taxesAndFees {
+            amount {
+              ...Money
+              __typename
+            }
+            type
+            isIncludedInPrice
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      subIngredientResults {
+        ... on TicketIngredientResponseQL {
+          ...ActivitySubIngredient
+          __typename
+        }
+        type: __typename
+      }
+      __typename
+    }
+    ... on TransportIngredientResponseQL {
+      addToBasketToken
+      date
+      allCarriers
+      durationRangeInMinutes {
+        from
+        to
+        __typename
+      }
+      totalPrice {
+        ...Money
+        __typename
+      }
+      priceRange {
+        from {
+          amount
+          __typename
+        }
+        to {
+          amount
+          __typename
+        }
+        __typename
+      }
+      legs {
+        ...Leg
+        __typename
+      }
+      legIndex
+      alternativeSuggestion {
+        addToBasketToken
+        totalPrice: price {
+          ...Money
+          __typename
+        }
+        legs {
+          ...Leg
+          __typename
+        }
+        legIndex
+        __typename
+      }
+      suggested {
+        rebookableOption {
+          addToBasketToken
+          rebookablePrice {
+            ...Money
+            __typename
+          }
+          rebookableTotalPrice {
+            ...Money
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    type: __typename
+  }
+  __typename
+}

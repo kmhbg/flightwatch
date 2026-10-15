@@ -1,0 +1,22 @@
+query PriceMatrixRendererQuery(
+  $search: SearchReturnInput
+  $filter: ItinerariesFilterInput
+  $options: ItinerariesOptionsInput
+) {
+  itineraryPriceTable(search: $search, filter: $filter, options: $options) {
+    __typename
+    ... on ItineraryPriceTable {
+      priceList {
+        outboundDate
+        inboundDate
+        price {
+          amount
+        }
+        rating
+      }
+    }
+    ... on AppError {
+      error: message
+    }
+  }
+}

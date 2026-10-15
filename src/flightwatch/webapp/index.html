@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flightwatch</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="icon.png">
+</head>
+<body>
+<header>
+  <div class="brand">✈ Flightwatch</div>
+  <nav id="trips" data-i18n-aria="app.trips"></nav>
+  <div class="actions">
+    <button id="btn-search" data-i18n="app.search" data-i18n-title="app.search_title"></button>
+    <button id="btn-new" data-i18n="app.new" data-i18n-title="app.new_title"></button>
+    <button id="btn-dates" class="ghost" data-i18n="app.dates" data-i18n-title="app.dates_title"></button>
+    <button id="btn-remove" class="ghost" data-i18n="app.remove" data-i18n-title="app.remove_title"></button>
+    <button id="btn-settings" class="ghost" data-i18n-title="app.settings_title">⚙</button>
+  </div>
+</header>
+
+<div id="update" class="alert" hidden></div>
+<div id="statusline" class="statusline"></div>
+<div id="alert" class="alert" hidden></div>
+
+<section class="origins">
+  <span class="label" data-i18n="app.origins"></span>
+  <div id="origins"></div>
+</section>
+
+<main>
+  <section class="list" data-i18n-aria="app.options">
+    <div id="headline" class="headline"></div>
+    <div id="combos" class="tabs" role="tablist"></div>
+    <div id="options"></div>
+    <h3><span data-i18n="app.alt_title"></span> <small data-i18n="app.alt_sub"></small></h3>
+    <div id="alternatives" class="alts"></div>
+    <h3><span data-i18n="app.trend_title"></span> <small data-i18n="app.trend_sub"></small></h3>
+    <svg id="trend" class="trend" viewBox="0 0 400 80" preserveAspectRatio="none" role="img" data-i18n-aria="app.trend_title"></svg>
+  </section>
+  <aside id="detail" class="detail" aria-live="polite">
+    <p class="muted" data-i18n="app.pick_option"></p>
+  </aside>
+</main>
+
+<dialog id="dlg-new">
+  <form id="form-new" method="dialog">
+    <h2 id="f-title"></h2>
+    <label><span data-i18n="dlg.from"></span> <small data-i18n="dlg.from_hint"></small>
+      <div class="suggest"><input id="f-from" autocomplete="off" placeholder="CPH"><ul></ul></div>
+    </label>
+    <label id="f-to-label"><span data-i18n="dlg.to"></span> <small data-i18n="dlg.to_hint"></small>
+      <div class="suggest"><input id="f-to" autocomplete="off" placeholder="Sitges"><ul></ul></div>
+    </label>
+    <div id="f-dates" class="grid">
+      <label><span data-i18n="dlg.depart"></span><input id="f-depart" type="date" required></label>
+      <label><span data-i18n="dlg.return"></span><input id="f-return" type="date" required></label>
+      <label><span data-i18n="dlg.flex"></span>
+        <select id="f-flex">
+          <option value="auto" data-i18n="dlg.flex_auto"></option>
+          <option value="0" data-i18n="dlg.flex_exact"></option>
+          <option value="1" data-i18n-n="dlg.flex_n:1"></option>
+          <option value="2" data-i18n-n="dlg.flex_n:2"></option>
+          <option value="3" data-i18n-n="dlg.flex_n:3"></option>
+        </select></label>
+      <label class="f-new"><span data-i18n="dlg.adults"></span><input id="f-adults" type="number" min="1" max="9" value="2"></label>
+      <label class="f-new"><span data-i18n="dlg.guests"></span><input id="f-guests" type="number" min="1" max="16" value="2"></label>
+    </div>
+    <p id="f-window" class="muted"></p>
+    <p id="f-msg" class="muted"></p>
+    <div class="row">
+      <button type="button" id="f-cancel" class="ghost" data-i18n="dlg.cancel"></button>
+      <button type="submit" id="f-submit"></button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-settings">
+  <form id="form-settings" method="dialog">
+    <h2 data-i18n="set.title"></h2>
+    <div class="grid">
+      <label><span data-i18n="set.language"></span>
+        <select id="s-language">
+          <option value="auto" data-i18n="set.lang_auto"></option>
+          <option value="sv">Svenska</option>
+          <option value="en">English</option>
+        </select></label>
+      <label><span data-i18n="set.currency"></span><select id="s-currency"></select></label>
+    </div>
+    <p class="muted" data-i18n="set.currency_hint"></p>
+    <label><span data-i18n="set.times"></span> <small id="s-times-hint" data-i18n="set.times_hint"></small>
+      <input id="s-times" autocomplete="off" placeholder="07:30, 19:30"></label>
+    <div class="grid">
+      <label><span data-i18n="set.origin"></span>
+        <div class="suggest"><input id="s-origin" autocomplete="off" placeholder="CPH"><ul></ul></div></label>
+      <label><span data-i18n="set.drop"></span><input id="s-drop" type="number" min="1" max="50"></label>
+    </div>
+    <label class="check"><input id="s-notify" type="checkbox"> <span data-i18n="set.notify"></span></label>
+    <label class="check" id="s-autostart-row"><input id="s-autostart" type="checkbox"> <span data-i18n="set.autostart"></span></label>
+    <p><a href="#" id="s-advanced" data-i18n="set.advanced"></a></p>
+    <p id="s-msg" class="muted"></p>
+    <div class="row">
+      <button type="button" id="s-cancel" class="ghost" data-i18n="dlg.cancel"></button>
+      <button type="submit" data-i18n="set.save"></button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>

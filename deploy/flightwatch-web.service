@@ -1,0 +1,10 @@
+[Unit]
+Description=Flightwatch – app (http://127.0.0.1:8765)
+
+[Service]
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+ExecStart=%h/.local/bin/flightwatch serve
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

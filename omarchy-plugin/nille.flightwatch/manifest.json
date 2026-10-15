@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "nille.flightwatch",
+  "name": "Flightwatch",
+  "version": "1.0.0",
+  "author": "nille",
+  "license": "MIT",
+  "description": "Flight price watch in the bar: best price incl. bags and lodging, alerts, departure airport switcher. Needs the flightwatch CLI (~/Work/flight-watch).",
+  "kinds": ["bar-widget"],
+  "entryPoints": { "barWidget": "BarWidget.qml" },
+  "barWidget": {
+    "displayName": "Flightwatch",
+    "description": "Best flight price for your watched trip, colored by your price targets. Click for details, middle-click to search now.",
+    "category": "Info",
+    "aliases": ["flight", "flyg", "flightwatch", "price"],
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

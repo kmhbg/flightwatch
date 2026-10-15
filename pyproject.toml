@@ -1,0 +1,38 @@
+[project]
+name = "flightwatch"
+version = "0.1.0"
+description = "Flight price watcher: flight + stay, packages, alerts. Omarchy bar widget or Windows/macOS tray app."
+authors = [
+    { name = "Sebastian Nilsson", email = "7773097+kmhbg@users.noreply.github.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "filelock>=4.2.0",
+    "httpx>=0.28.1",
+    "platformdirs>=4.13.0",
+    "playwright>=1.63.0",
+    "tomlkit>=0.15.1",
+    "websockets>=17.2",
+]
+
+[project.optional-dependencies]
+# The desktop app (`flightwatch app`): window, tray icon, notifications. The Linux/Omarchy setup doesn't need it.
+gui = [
+    "desktop-notifier>=6.2.0",
+    "pillow>=11.0",
+    "pystray>=0.19.5",
+    "pywebview>=6.2",
+]
+build = ["pyinstaller>=6.16"]
+
+[project.scripts]
+flightwatch = "flightwatch:main"
+
+[build-system]
+requires = ["uv_build>=0.12.17,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

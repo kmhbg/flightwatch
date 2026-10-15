@@ -1,0 +1,122 @@
+# Builds the Windows installer and macOS disk images. Runs on version tags (v0.2.0 → GitHub release)
+# and by hand (workflow_dispatch → downloadable artifacts only).
+#
+# macOS signing/notarization runs only when these repository secrets exist (Apple Developer account):
+#   MACOS_CERT_P12 (base64 Developer ID Application .p12), MACOS_CERT_PASSWORD, MACOS_SIGN_IDENTITY
+#   ("Developer ID Application: Name (TEAMID)"), APPLE_API_KEY_P8 (base64), APPLE_API_KEY_ID, APPLE_API_ISSUER.
+# Without them the .dmg is unsigned: macOS users open it the first time with right-click → Open.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: windows
+          - os: macos-15
+            target: mac-arm64
+          - os: macos-15-intel
+            target: mac-x86_64
+    runs-on: ${{ matrix.os }}
+    env:  # job level so the steps' `if:` can test whether they are set
+      MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+      MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+      MACOS_SIGN_IDENTITY: ${{ secrets.MACOS_SIGN_IDENTITY }}
+      APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+      APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+      APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install ".[gui,build]"
+
+      - name: Tests
+        run: |
+          pip install pytest
+          python -m pytest -q tests
+
+      - name: Icons
+        run: python packaging/make_icons.py
+
+      - name: Build app
+        run: pyinstaller --noconfirm --clean --distpath dist --workpath build packaging/flightwatch.spec
+
+      - name: Version
+        id: v
+        shell: bash
+        run: echo "version=$(python -c 'from importlib.metadata import version; print(version("flightwatch"))')" >> "$GITHUB_OUTPUT"
+
+      # --- Windows: Inno Setup installer -------------------------------------------------------
+      - name: Installer (Windows)
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: |
+          if (-not (Get-Command iscc -ErrorAction SilentlyContinue)) { choco install innosetup -y --no-progress }
+          $iscc = (Get-Command iscc -ErrorAction SilentlyContinue).Source
+          if (-not $iscc) { $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
+          & $iscc "/DAppVersion=${{ steps.v.outputs.version }}" packaging\windows\flightwatch.iss
+
+      # --- macOS: optional signing + notarization, then .dmg ----------------------------------
+      - name: Sign (macOS)
+        if: startsWith(matrix.target, 'mac') && env.MACOS_CERT_P12 != ''
+        run: |
+          echo "$MACOS_CERT_P12" | base64 --decode > cert.p12
+          security create-keychain -p ci build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p ci build.keychain
+          security import cert.p12 -k build.keychain -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ci build.keychain
+          codesign --deep --force --options runtime --timestamp --sign "$MACOS_SIGN_IDENTITY" dist/Flightwatch.app
+
+      - name: Disk image (macOS)
+        if: startsWith(matrix.target, 'mac')
+        run: |
+          mkdir -p dmg && cp -R dist/Flightwatch.app dmg/ && ln -s /Applications dmg/Applications
+          hdiutil create -volname Flightwatch -srcfolder dmg -ov -format UDZO \
+            "dist/Flightwatch-${{ steps.v.outputs.version }}-${{ matrix.target }}.dmg"
+
+      - name: Notarize (macOS)
+        if: startsWith(matrix.target, 'mac') && env.APPLE_API_KEY_P8 != ''
+        run: |
+          echo "$APPLE_API_KEY_P8" | base64 --decode > key.p8
+          DMG="dist/Flightwatch-${{ steps.v.outputs.version }}-${{ matrix.target }}.dmg"
+          xcrun notarytool submit "$DMG" --key key.p8 --key-id "$APPLE_API_KEY_ID" --issuer "$APPLE_API_ISSUER" --wait
+          xcrun stapler staple "$DMG"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flightwatch-${{ matrix.target }}
+          path: |
+            dist/*-setup.exe
+            dist/*.dmg
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: out/*
+          generate_release_notes: true

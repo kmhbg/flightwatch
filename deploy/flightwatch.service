@@ -1,0 +1,9 @@
+[Unit]
+Description=Flightwatch – flygprisbevakning (alla källor)
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/flightwatch run
+TimeoutStartSec=30min
+Nice=10
